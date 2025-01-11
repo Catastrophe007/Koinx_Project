@@ -38,5 +38,47 @@ export const apiController = {
         res.status(500).json({ message: "Internal server error" });
       }
     },
+    getDeviation: async(req,res)=>{
+        try {
+            const coins = req.query.coin;
+            if (!coins) return res.status(400).json({ message: "Please provide coin" });
+      
+            const coinsArray = coins.split(",");
+            const result = {};
+      
+            for (let coin of coinsArray) {
+                // console.log(coin);
+                const data = await Coin.aggregate([
+                    { $match: { coin: coin } }, 
+                    { $sort: { timestamp: -1 } }, 
+                    { $limit: 100 }, 
+                    {
+                      $group: {
+                        _id: "$coin",
+                        stdDev: { $stdDevSamp: "$price" } 
+                      }
+                    }
+                  ]);
+                // console.log(data);
+              if (data.length>0) {
+                result[coin] = {
+                 deviation:data[0].stdDev
+                };
+              }
+            }
+
+      
+            if (Object.keys(result).length === 0) {
+              return res
+                .status(404)
+                .json({ message: "No deviation found. Check coin names properly." });
+            }
+      
+            return res.status(200).json(result);
+          } catch (error) {
+            console.error("Error:", error);
+            res.status(500).json({ message: "Internal server error" });
+          }
+    }
   };
   
