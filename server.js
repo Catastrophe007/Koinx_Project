@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import {connectDB} from './config/db.js'
+// import { retrieveCoinData } from './queue.js';
 
 dotenv.config();
 
@@ -13,3 +14,9 @@ app.listen(PORT,async ()=>{
   connectDB();
   console.log("Db connected");
 })
+
+// retrieveCoinData().then(data=>{
+//   console.log("Data:",data);
+// }).catch(error=>{
+//   console.error("Error:",error);
+// })
